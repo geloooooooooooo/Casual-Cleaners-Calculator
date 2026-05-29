@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Residential Pricing Calculator</title>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme="light"] {
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem; --space-16: 4rem;
+      --color-bg: #f7f6f2; --color-surface: #f9f8f5; --color-surface-2: #fbfbf9; --color-surface-offset: #edeae5; --color-border: #d4d1ca;
+      --color-text: #28251d; --color-text-muted: #6e6b64; --color-text-faint: #9e9b93; --color-text-inverse: #f9f8f4;
+      --color-primary: #01696f; --color-primary-hover: #0c4e54; --color-primary-highlight: #cedcd8; --color-success: #437a22; --color-warning: #964219;
+      --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem; --radius-xl: 1rem; --radius-full: 9999px;
+      --shadow-sm: 0 1px 2px rgba(40,37,29,.06); --shadow-md: 0 10px 24px rgba(40,37,29,.08); --shadow-lg: 0 18px 40px rgba(40,37,29,.12);
+      --transition: 180ms cubic-bezier(0.16,1,0.3,1);
+      --font-body: 'General Sans', Inter, sans-serif;
+      --font-display: 'General Sans', Inter, sans-serif;
+    }
+    [data-theme="dark"] {
+      --color-bg: #171614; --color-surface: #1c1b19; --color-surface-2: #201f1d; --color-surface-offset: #22211f; --color-border: #393836;
+      --color-text: #cdccca; --color-text-muted: #9d9b97; --color-text-faint: #6d6b67; --color-text-inverse: #171614;
+      --color-primary: #4f98a3; --color-primary-hover: #227f8b; --color-primary-highlight: #313b3b; --color-success: #6daa45; --color-warning: #bb653b;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.2); --shadow-md: 0 10px 24px rgba(0,0,0,.3); --shadow-lg: 0 18px 40px rgba(0,0,0,.4);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      min-height: 100dvh; font-family: var(--font-body); font-size: var(--text-base); line-height: 1.6;
+      color: var(--color-text); background:
+      radial-gradient(circle at top right, color-mix(in srgb, var(--color-primary) 10%, transparent), transparent 28%),
+      var(--color-bg);
+    }
+    img, svg { display: block; max-width: 100%; }
+    button, input, select { font: inherit; color: inherit; }
+    button { cursor: pointer; border: none; background: none; }
+    .shell { width: min(1180px, calc(100% - 2rem)); margin: 0 auto; }
+    .skip-link { position: absolute; left: -999px; top: 0; }
+    .skip-link:focus { left: 1rem; top: 1rem; z-index: 99; background: var(--color-primary); color: var(--color-text-inverse); padding: .75rem 1rem; border-radius: var(--radius-md); }
+    .header { padding: var(--space-6) 0 var(--space-4); }
+    .header-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
+    .brand { display: inline-flex; align-items: center; gap: .8rem; text-decoration: none; color: inherit; }
+    .logo { width: 42px; height: 42px; border-radius: 14px; background: linear-gradient(135deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 72%, white)); color: white; display: grid; place-items: center; box-shadow: var(--shadow-sm); }
+    .brand-copy strong { display: block; font-size: var(--text-sm); letter-spacing: .04em; text-transform: uppercase; }
+    .brand-copy span { display: block; font-size: var(--text-xs); color: var(--color-text-muted); }
+    .theme-toggle { min-width: 44px; min-height: 44px; display: grid; place-items: center; border-radius: var(--radius-full); border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent); background: var(--color-surface); }
+    .hero { padding: var(--space-6) 0 var(--space-10); }
+    .hero-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: var(--space-8); align-items: start; }
+    .eyebrow { display: inline-flex; align-items: center; gap: .5rem; padding: .45rem .8rem; border-radius: var(--radius-full); background: var(--color-primary-highlight); color: var(--color-primary); font-size: var(--text-xs); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+    h1 { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.02; max-width: 12ch; margin-top: var(--space-4); }
+    .lead { color: var(--color-text-muted); max-width: 58ch; margin-top: var(--space-4); }
+    .hero-notes { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: var(--space-5); }
+    .hero-notes span { padding: .6rem .85rem; border-radius: var(--radius-full); background: var(--color-surface); border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); font-size: var(--text-sm); }
+    .card { background: color-mix(in srgb, var(--color-surface) 90%, transparent); border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); border-radius: var(--radius-xl); box-shadow: var(--shadow-md); }
+    .form-card { padding: var(--space-6); }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+    .field { display: grid; gap: .45rem; }
+    .field.full { grid-column: 1 / -1; }
+    label { font-size: var(--text-sm); font-weight: 600; }
+    .hint { font-size: var(--text-xs); color: var(--color-text-muted); }
+    select, input[type="number"] {
+      width: 100%; min-height: 48px; padding: .85rem 1rem; border-radius: var(--radius-md);
+      border: 1px solid color-mix(in srgb, var(--color-text) 14%, transparent); background: var(--color-surface-2);
+      outline: none; transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+    }
+    select:focus, input[type="number"]:focus { border-color: var(--color-primary); box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 18%, transparent); }
+    .pill-group { display: flex; flex-wrap: wrap; gap: .65rem; }
+    .pill { position: relative; }
+    .pill input { position: absolute; opacity: 0; inset: 0; }
+    .pill span {
+      display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: .75rem 1rem; border-radius: var(--radius-full);
+      background: var(--color-surface-2); border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); transition: all var(--transition);
+      font-size: var(--text-sm); font-weight: 500;
+    }
+    .pill input:checked + span { background: var(--color-primary); color: var(--color-text-inverse); border-color: var(--color-primary); }
+    .addons { display: grid; gap: .75rem; }
+    .check {
+      display: flex; align-items: start; gap: .85rem; padding: 1rem; border-radius: var(--radius-lg); background: var(--color-surface-2);
+      border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
+    }
+    .check input { margin-top: .25rem; width: 18px; height: 18px; accent-color: var(--color-primary); }
+    .check strong { display: block; font-size: var(--text-sm); }
+    .check small { display: block; color: var(--color-text-muted); }
+    .main { padding-bottom: var(--space-16); }
+    .layout { display: grid; grid-template-columns: 1.05fr .95fr; gap: var(--space-8); align-items: start; }
+    .summary { padding: var(--space-6); position: sticky; top: 1rem; }
+    .summary-top { display: flex; justify-content: space-between; align-items: start; gap: var(--space-4); }
+    .price { font-size: clamp(2rem, 1.5rem + 2vw, 3.25rem); line-height: 1; font-weight: 700; letter-spacing: -.04em; }
+    .summary-label { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .08em; color: var(--color-text-muted); }
+    .breakdown { margin-top: var(--space-5); display: grid; gap: .85rem; }
+    .row { display: flex; justify-content: space-between; gap: 1rem; padding-bottom: .85rem; border-bottom: 1px dashed color-mix(in srgb, var(--color-text) 14%, transparent); }
+    .row span:last-child { font-weight: 600; white-space: nowrap; }
+    .row.muted span:first-child { color: var(--color-text-muted); }
+    .row.total { border-bottom: none; padding-top: .4rem; }
+    .row.total span { font-size: var(--text-lg); font-weight: 700; }
+    .badge-line { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: var(--space-4); }
+    .badge { padding: .5rem .75rem; border-radius: var(--radius-full); font-size: var(--text-xs); background: var(--color-primary-highlight); color: var(--color-primary); font-weight: 600; }
+    .secondary { margin-top: var(--space-8); padding: var(--space-5); }
+    h2 { font-size: var(--text-lg); margin-bottom: var(--space-3); }
+    .list { display: grid; gap: .8rem; color: var(--color-text-muted); }
+    .list div { padding-left: 1.1rem; position: relative; }
+    .list div::before { content: ''; position: absolute; left: 0; top: .62rem; width: 7px; height: 7px; border-radius: 999px; background: var(--color-primary); }
+    .note { margin-top: var(--space-4); padding: 1rem; border-radius: var(--radius-lg); background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface)); color: var(--color-text); font-size: var(--text-sm); }
+    .actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: var(--space-5); }
+    .btn {
+      min-height: 48px; padding: .85rem 1.1rem; border-radius: var(--radius-md); display: inline-flex; align-items: center; justify-content: center; gap: .55rem;
+      border: 1px solid transparent; text-decoration: none; transition: transform var(--transition), background var(--transition), border-color var(--transition);
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: var(--color-primary); color: var(--color-text-inverse); }
+    .btn-primary:hover { background: var(--color-primary-hover); }
+    .btn-secondary { background: var(--color-surface-2); color: var(--color-text); border-color: color-mix(in srgb, var(--color-text) 10%, transparent); }
+    .fineprint { margin-top: var(--space-4); font-size: var(--text-xs); color: var(--color-text-muted); }
+    @media (max-width: 960px) {
+      .hero-grid, .layout { grid-template-columns: 1fr; }
+      .summary { position: static; }
+    }
+    @media (max-width: 640px) {
+      .shell { width: min(100% - 1rem, 1180px); }
+      .form-card, .summary, .secondary { padding: var(--space-4); }
+      .form-grid { grid-template-columns: 1fr; }
+      h1 { max-width: 14ch; }
+      .header-row, .summary-top { align-items: center; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="header">
+    <div class="shell header-row">
+      <a class="brand" href="#" aria-label="Residential pricing calculator home">
+        <div class="logo" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 12l8-8 8 8"></path>
+            <path d="M6 10v9h12v-9"></path>
+            <path d="M10 19v-5h4v5"></path>
+          </svg>
+        </div>
+        <div class="brand-copy">
+          <strong>Residential Pricing</strong>
+          <span>Flat-rate calculator for home cleaning quotes</span>
+        </div>
+      </a>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="main">
+    <section class="hero">
+      <div class="shell hero-grid">
+        <div>
+          <span class="eyebrow">Residential quote tool</span>
+          <h1>Build instant home cleaning prices in one screen.</h1>
+          <p class="lead">This calculator uses a flat-rate structure based on bedrooms, bathrooms, service type, frequency, and add-ons, which mirrors how established residential cleaners commonly present quotes and price lists.</p>
+          <div class="hero-notes" aria-label="Calculator highlights">
+            <span>Standard, deep, and move-out pricing</span>
+            <span>Recurring discounts built in</span>
+            <span>Add-ons separated clearly</span>
+          </div>
+        </div>
+        <section class="card form-card" aria-labelledby="calculator-heading">
+          <h2 id="calculator-heading">Quote inputs</h2>
+          <form id="pricingForm" class="form-grid">
+            <div class="field">
+              <label for="serviceType">Service type</label>
+              <select id="serviceType" name="serviceType">
+                <option value="standard">Standard clean</option>
+                <option value="deep">Deep clean</option>
+                <option value="move">Move in / move out</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="frequency">Frequency</label>
+              <select id="frequency" name="frequency">
+                <option value="one-time">One time</option>
+                <option value="weekly">Weekly</option>
+                <option value="fortnightly">Fortnightly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="bedrooms">Bedrooms</label>
+              <select id="bedrooms" name="bedrooms">
+                <option value="1">1 bedroom</option>
+                <option value="2">2 bedrooms</option>
+                <option value="3" selected>3 bedrooms</option>
+                <option value="4">4 bedrooms</option>
+                <option value="5">5 bedrooms</option>
+                <option value="6">6 bedrooms</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="bathrooms">Bathrooms</label>
+              <select id="bathrooms" name="bathrooms">
+                <option value="1">1 bathroom</option>
+                <option value="2" selected>2 bathrooms</option>
+                <option value="3">3 bathrooms</option>
+                <option value="4">4 bathrooms</option>
+              </select>
+            </div>
+            <div class="field full">
+              <label>Home condition</label>
+              <div class="pill-group" role="radiogroup" aria-label="Home condition">
+                <label class="pill"><input type="radio" name="condition" value="normal" checked><span>Average</span></label>
+                <label class="pill"><input type="radio" name="condition" value="heavy"><span>Heavy buildup</span></label>
+                <label class="pill"><input type="radio" name="condition" value="extra"><span>Very heavy</span></label>
+              </div>
+              <p class="hint">Condition loading helps protect your margin on first visits and neglected homes.</p>
+            </div>
+            <div class="field full">
+              <label>Add-ons</label>
+              <div class="addons">
+                <label class="check"><input type="checkbox" value="79" data-label="Oven clean"><span><strong>Oven clean</strong><small>Detailed interior oven clean.</small></span></label>
+                <label class="check"><input type="checkbox" value="79" data-label="Interior windows"><span><strong>Interior windows</strong><small>Interior glass and tracks where accessible.</small></span></label>
+                <label class="check"><input type="checkbox" value="60" data-label="Inside fridge"><span><strong>Inside fridge</strong><small>Empty and wipe internal shelving.</small></span></label>
+                <label class="check"><input type="checkbox" value="40" data-label="Inside cabinets"><span><strong>Inside cabinets</strong><small>Interior cabinet wipe-down.</small></span></label>
+                <label class="check"><input type="checkbox" value="40" data-label="Additional room"><span><strong>Additional room</strong><small>Office, rumpus, or extra living space.</small></span></label>
+                <label class="check"><input type="checkbox" value="26" data-label="Laundry / folding"><span><strong>Laundry / folding</strong><small>Housekeeping support add-on.</small></span></label>
+              </div>
+            </div>
+          </form>
+        </section>
+      </div>
+    </section>
+
+    <section class="shell layout" aria-label="Pricing calculator results and notes">
+      <section class="card summary" aria-live="polite">
+        <div class="summary-top">
+          <div>
+            <div class="summary-label">Estimated price</div>
+            <div class="price" id="finalPrice">$218</div>
+          </div>
+          <div class="badge-line">
+            <span class="badge" id="discountBadge">No recurring discount</span>
+          </div>
+        </div>
+        <div class="breakdown" id="breakdown"></div>
+        <div class="actions">
+          <button class="btn btn-primary" type="button" id="copyQuote">Copy quote summary</button>
+          <button class="btn btn-secondary" type="button" id="resetForm">Reset</button>
+        </div>
+        <p class="fineprint">Use this as an estimate. Final prices can still be adjusted for access, pet hair, clutter, or severe buildup after review.</p>
+      </section>
+
+      <div>
+        <section class="card secondary">
+          <h2>Included in the structure</h2>
+          <div class="list">
+            <div>Flat-rate base pricing by bedroom count, with bathroom adjustments layered on top.</div>
+            <div>Service multipliers for standard, deep clean, and move in or move out work.</div>
+            <div>Recurring discounts for weekly, fortnightly, and monthly clients.</div>
+            <div>Optional add-ons kept separate so the base quote stays simple and visible.</div>
+          </div>
+        </section>
+        <section class="card secondary">
+          <h2>Standard clean checklist</h2>
+          <div class="list">
+            <div>Dust reachable surfaces, vacuum floors, and mop hard flooring.</div>
+            <div>Wipe kitchen benches, appliance exteriors, splashbacks, and sinks.</div>
+            <div>Clean showers, bathtubs, toilets, mirrors, and vanities.</div>
+            <div>Empty bins and finish with a general tidy of the serviced areas.</div>
+          </div>
+          <div class="note">Deep cleans and move-out cleans should include more detailed buildup removal and usually require a premium above standard maintenance pricing.</div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const bedroomBase = { 1: 139, 2: 152, 3: 193, 4: 246, 5: 280, 6: 353 };
+    const bathroomAdjustment = { 1: 0, 2: 25, 3: 55, 4: 95 };
+    const serviceMultiplier = { standard: 1, deep: 1.35, move: 2.65 };
+    const frequencyDiscount = { 'one-time': 0, weekly: 0.10, fortnightly: 0.10, monthly: 0.05 };
+    const conditionFee = { normal: 0, heavy: 45, extra: 95 };
+
+    const form = document.getElementById('pricingForm');
+    const priceEl = document.getElementById('finalPrice');
+    const breakdownEl = document.getElementById('breakdown');
+    const discountBadge = document.getElementById('discountBadge');
+    const copyBtn = document.getElementById('copyQuote');
+    const resetBtn = document.getElementById('resetForm');
+    const themeToggle = document.querySelector('[data-theme-toggle]');
+    const root = document.documentElement;
+
+    function formatMoney(value) {
+      return new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 }).format(value);
+    }
+
+    function currentValues() {
+      const data = new FormData(form);
+      const addOns = [...form.querySelectorAll('.addons input:checked')].map(input => ({
+        label: input.dataset.label,
+        value: Number(input.value)
+      }));
+      return {
+        serviceType: data.get('serviceType'),
+        frequency: data.get('frequency'),
+        bedrooms: Number(data.get('bedrooms')),
+        bathrooms: Number(data.get('bathrooms')),
+        condition: data.get('condition'),
+        addOns
+      };
+    }
+
+    function calculate() {
+      const values = currentValues();
+      const base = bedroomBase[values.bedrooms];
+      const bath = bathroomAdjustment[values.bathrooms] || 0;
+      const preService = base + bath;
+      const serviceLoad = Math.round(preService * (serviceMultiplier[values.serviceType] - 1));
+      const conditionLoad = conditionFee[values.condition] || 0;
+      const addOnTotal = values.addOns.reduce((sum, item) => sum + item.value, 0);
+      const subtotal = preService + serviceLoad + conditionLoad + addOnTotal;
+      const discountRate = frequencyDiscount[values.frequency] || 0;
+      const discountValue = Math.round((preService + serviceLoad) * discountRate);
+      const total = Math.max(0, subtotal - discountValue);
+
+      const rows = [
+        ['Base home price', formatMoney(base)],
+        ['Bathroom adjustment', formatMoney(bath)],
+        ['Service loading', formatMoney(serviceLoad)],
+        ['Condition loading', formatMoney(conditionLoad)]
+      ];
+
+      values.addOns.forEach(item => rows.push([item.label, formatMoney(item.value)]));
+      if (discountValue > 0) rows.push(['Recurring discount', `−${formatMoney(discountValue)}`]);
+      rows.push(['Estimated total', formatMoney(total), 'total']);
+
+      breakdownEl.innerHTML = rows.map(([label, value, kind]) => `
+        <div class="row ${kind === 'total' ? 'total' : 'muted'}">
+          <span>${label}</span>
+          <span>${value}</span>
+        </div>
+      `).join('');
+
+      priceEl.textContent = formatMoney(total);
+      discountBadge.textContent = discountRate > 0 ? `${Math.round(discountRate * 100)}% recurring discount` : 'No recurring discount';
+
+      return { ...values, base, bath, serviceLoad, conditionLoad, addOnTotal, discountValue, total };
+    }
+
+    function updateThemeIcon(theme) {
+      themeToggle.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`);
+      themeToggle.innerHTML = theme === 'dark'
+        ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>'
+        : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+    }
+
+    const initialTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    root.setAttribute('data-theme', initialTheme);
+    updateThemeIcon(initialTheme);
+
+    themeToggle.addEventListener('click', () => {
+      const nextTheme = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', nextTheme);
+      updateThemeIcon(nextTheme);
+    });
+
+    form.addEventListener('input', calculate);
+    form.addEventListener('change', calculate);
+
+    copyBtn.addEventListener('click', async () => {
+      const values = calculate();
+      const extras = values.addOns.length ? values.addOns.map(item => `${item.label} ${formatMoney(item.value)}`).join(', ') : 'No add-ons';
+      const summary = [
+        `Residential Cleaning Quote`,
+        `Service: ${values.serviceType}`,
+        `Frequency: ${values.frequency}`,
+        `Bedrooms: ${values.bedrooms}`,
+        `Bathrooms: ${values.bathrooms}`,
+        `Condition: ${values.condition}`,
+        `Add-ons: ${extras}`,
+        `Estimated total: ${formatMoney(values.total)}`
+      ].join('\n');
+      try {
+        await navigator.clipboard.writeText(summary);
+        copyBtn.textContent = 'Copied';
+        setTimeout(() => copyBtn.textContent = 'Copy quote summary', 1400);
+      } catch (error) {
+        copyBtn.textContent = 'Copy unavailable';
+        setTimeout(() => copyBtn.textContent = 'Copy quote summary', 1400);
+      }
+    });
+
+    resetBtn.addEventListener('click', () => {
+      form.reset();
+      form.querySelector('select[name="serviceType"]').value = 'standard';
+      form.querySelector('select[name="frequency"]').value = 'one-time';
+      form.querySelector('select[name="bedrooms"]').value = '3';
+      form.querySelector('select[name="bathrooms"]').value = '2';
+      form.querySelector('input[name="condition"][value="normal"]').checked = true;
+      calculate();
+    });
+
+    calculate();
+  </script>
+</body>
+</html>
